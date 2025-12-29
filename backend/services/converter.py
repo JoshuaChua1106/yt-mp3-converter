@@ -4,6 +4,10 @@ import os
 def run_converter(youtube_url, output_folder="downloads"):
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
+    
+    # Get the absolute path to the ffmpeg binary in the bin folder
+    script_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    ffmpeg_path = os.path.join(script_dir, 'bin', 'ffmpeg.exe')
 
     # Configuration ofor yt_dlp
     ydl_opts = {
@@ -28,6 +32,7 @@ def run_converter(youtube_url, output_folder="downloads"):
 
         'prefer_ffmpeg': True,
         'keepvideo': False,  # Deletes the original video/m4a after mp3 is made
+        'ffmpeg_location': ffmpeg_path,  # Use local ffmpeg binary
     }
 
     try:
