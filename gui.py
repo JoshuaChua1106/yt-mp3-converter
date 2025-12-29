@@ -4,7 +4,6 @@ import tkinter.filedialog as filedialog
 import sys
 import os
 import threading
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from backend.services.converter import run_converter
 
 
