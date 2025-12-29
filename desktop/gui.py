@@ -3,6 +3,7 @@ import tkinter.messagebox as messagebox
 import tkinter.filedialog as filedialog
 import sys
 import os
+import threading
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from backend.services.converter import run_converter
 
@@ -73,24 +74,37 @@ class App(ctk.CTk):
             messagebox.showwarning("Error", "Please paste a URL first!")
             return
 
-        # For now, we just simulate the start
-        self.status_label.configure(text=f"Connecting to YouTube...", text_color="yellow")
+        # Start the download
+        self.status_label.configure(text=f"Downloading", text_color="yellow")
         self.download_button.configure(state="disabled")
         
-        print(f"User wants to download: {url}")
-        print(f"Output folder: {self.output_folder}")
+        thread = threading.Thread(target=self.download_thread, args=(url,), daemon=True)
+        thread.start()
+
+    def download_thread(self, url):
+        try:
+            print(f"User wants to download: {url}")
+            print(f"Output folder: {self.output_folder}")
+            
+            # Call converter with selected output folder
+            success = run_converter(url, self.output_folder)
+
+            if success:
+                # Only show success if run_converter actually returned True
+                self.after(0, lambda: self.status_label.configure(text="Success!", text_color="green"))
+                self.after(0, lambda: messagebox.showinfo("Done", "MP3 Downloaded successfully!"))
+            else:
+                # Handle the case where the downloader caught its own error and returned False
+                self.after(0, lambda: self.status_label.configure(text="Download Failed", text_color="red"))
+                self.after(0, lambda: messagebox.showerror("Error", "The conversion failed. Check your URL or internet."))
+
+        except Exception as e:
+            self.after(0, lambda: messagebox.showerror("Error", f"Failed: {str(e)}"))
+            self.after(0, lambda: self.status_label.configure(text="Error", text_color="red"))
         
-        # Call converter with selected output folder
-        success = run_converter(url, self.output_folder)
-
-        if success:
-            print("MP3 Downloaded")
-        else:
-            print("Failed")
-
-        # Reset UI
-        self.download_button.configure(state="normal")
-        self.status_label.configure(text="Ready", text_color="green")
+        finally:
+            # Always re-enable the button
+            self.after(0, lambda: self.download_button.configure(state="normal"))
 
 if __name__ == "__main__":
     app = App()
