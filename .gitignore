@@ -31,7 +31,10 @@ MANIFEST
 
 # PyInstaller
 *.manifest
-*.spec
+# *.spec  # Commented out so we can track our custom spec file
+build/
+dist/
+*.exe
 
 # Unit test / coverage reports
 htmlcov/
