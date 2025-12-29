@@ -1,13 +1,22 @@
 import yt_dlp
 import os
+import sys
+
+def get_resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        base_path = sys._MEIPASS  # Path when running as .exe
+    except Exception:
+        base_path = os.path.abspath(".")  # Path when running as .py
+    return os.path.join(base_path, relative_path)
 
 def run_converter(youtube_url, output_folder="downloads"):
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
     
-    # Get the absolute path to the ffmpeg binary in the bin folder
-    script_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    ffmpeg_path = os.path.join(script_dir, 'bin', 'ffmpeg.exe')
+    # Get the absolute path to the ffmpeg binary using PyInstaller-compatible method
+    ffmpeg_bin_path = get_resource_path("bin")
+    ffmpeg_path = os.path.join(ffmpeg_bin_path, 'ffmpeg.exe')
 
     # Configuration ofor yt_dlp
     ydl_opts = {
